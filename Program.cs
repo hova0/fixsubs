@@ -52,18 +52,43 @@ namespace fixsubs
                         string subline = sr.ReadLine();
                         subsfile_linenumber++;
                         if (IgnoreLine(subline))
-                            continue;
-                        string[] words = subline.ToLowerInvariant().Split(' ');
-                        for (int i = 0; i < words.Length - 2; i++)
                         {
-                            if(i < words.Length - 3 && wordlist.Contains(words[i] + words[i+1] + words[i+2]))
-                                Console.WriteLine("( {0} ) : {1}", subsfile_linenumber, words[i] + words[i+1] + words[i+2]);
-                            // word seperated by a space
-                            if (!wordlist.Contains(words[i]) && wordlist.Contains(words[i] + words[i+1]))
-                            {
-                                Console.WriteLine("[ {0} ] : {1}", subsfile_linenumber, words[i] + words[i+1]);
-                            }
+                            sw.WriteLine(subline);
+                            continue;
                         }
+                        //if(subsfile_linenumber == 90) 
+
+                        string[] words = subline.ToLowerInvariant().Split( new char[] {' '} , System.StringSplitOptions.RemoveEmptyEntries).ToArray();
+
+                        for (int i = 0; i < words.Length; i++)
+                        {
+                            bool wordsjoined = false;
+                            if (words[i] == "e")
+                                Console.WriteLine(words[i]);
+                            for (int y = words.Length - 1; y >= i; y--)
+                            {
+                                string newword = String.Concat(words.Where((xz, yz) => yz >= i && yz <= y));
+                                
+                                if (wordlist.Contains(newword.TrimEnd(new char[] { '.', '?', ','})))
+                                {
+                                    sw.Write(newword);
+                                    i += (y - i);
+                                    wordsjoined = true;
+                                }
+                            }
+                            if (!wordsjoined) {
+                                if(words[i] == "l")
+                                    words[i] = "I"; // OCR error seeing "I" as "L"
+                                sw.Write(words[i]);
+                            }
+                            sw.Write(" ");
+                            // word seperated by a space
+                            //if (!wordlist.Contains(words[i]) && wordlist.Contains(words[i] + words[i+1]))
+                            //{
+                            //    Console.WriteLine("[ {0} ] : {1}", subsfile_linenumber, words[i] + words[i+1]);
+                            //}
+                        }
+                        sw.WriteLine();
                     }
                 }
             }
