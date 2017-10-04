@@ -13,16 +13,13 @@ namespace fixsubs
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("Usage: fixsubs filename <dictionaryfile>");
-                Console.WriteLine("Return Error Codes:");
-                Console.WriteLine("1        : Input file does not exist");
-                Console.WriteLine("2        : Word Dictionary file does not exist");
-                Console.WriteLine("-1       : Abnormal termination");
-                return 0;
+                return PrintHelp();
             }
             if (args.Length > 0 && !File.Exists(args[0]))
             {
+                PrintHelp();
                 Console.WriteLine("File {0} does not exist!", args[0]);
+                
                 return 1;
             }
             string defaultwordlist = "english-words.10";
@@ -32,6 +29,7 @@ namespace fixsubs
             }
             if (!File.Exists(defaultwordlist))
             {
+                PrintHelp();
                 Console.WriteLine(String.Format("Default word list file {0} not found!", defaultwordlist));
                 return 2;
             }
@@ -95,6 +93,18 @@ namespace fixsubs
 
 
             return -1;
+        }
+
+        private static int PrintHelp()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Usage: fixsubs filename <dictionaryfile>");
+            Console.WriteLine("Return Error Codes:");
+            Console.WriteLine("1        : Input file does not exist");
+            Console.WriteLine("2        : Word Dictionary file does not exist");
+            Console.WriteLine("-1       : Abnormal termination");
+            Console.WriteLine("Output will always be \"output.srt\"");
+                return 0;
         }
 
         private static System.Text.RegularExpressions.Regex linenumber = new System.Text.RegularExpressions.Regex(@"^\d+$", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Singleline);
