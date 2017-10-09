@@ -51,42 +51,44 @@ namespace fixsubs
                         subsfile_linenumber++;
                         if (IgnoreLine(subline))
                         {
+                            // Write line as is, and continue to the next.
                             sw.WriteLine(subline);
                             continue;
                         }
-                        //if(subsfile_linenumber == 90) 
 
+                        // Split up the line by spaces
                         string[] words = subline.ToLowerInvariant().Split( new char[] {' '} , System.StringSplitOptions.RemoveEmptyEntries).ToArray();
 
                         for (int i = 0; i < words.Length; i++)
                         {
                             bool wordsjoined = false;
-                            if (words[i] == "e")
-                                Console.WriteLine(words[i]);
+                            
+                            // For debugging mystery works
+                            //if (words[i] == "e")
+                            //    Console.WriteLine(words[i]);
+
                             for (int y = words.Length - 1; y >= i; y--)
                             {
+                                // Start with the longest word possible and gradually lose words until we find it in the dictionary
+                                // This concats from our start word to an end word until i == y
                                 string newword = String.Concat(words.Where((xz, yz) => yz >= i && yz <= y));
-                                
+
                                 if (wordlist.Contains(newword.TrimEnd(new char[] { '.', '?', ','})))
                                 {
                                     sw.Write(newword);
-                                    i += (y - i);
+                                    i += (y - i);   //Since we found a long word from multiple short words, advance the main word pointer by the words we joined
                                     wordsjoined = true;
                                 }
                             }
                             if (!wordsjoined) {
+                                // Couldn't find a long word, so write the current as is.
                                 if(words[i] == "l")
                                     words[i] = "I"; // OCR error seeing "I" as "L"
                                 sw.Write(words[i]);
                             }
-                            sw.Write(" ");
-                            // word seperated by a space
-                            //if (!wordlist.Contains(words[i]) && wordlist.Contains(words[i] + words[i+1]))
-                            //{
-                            //    Console.WriteLine("[ {0} ] : {1}", subsfile_linenumber, words[i] + words[i+1]);
-                            //}
+                            sw.Write(" ");  
                         }
-                        sw.WriteLine();
+                        sw.WriteLine(); 
                     }
                 }
             }
@@ -95,7 +97,8 @@ namespace fixsubs
             return -1;
         }
 
-        private static int PrintHelp()
+        // General Help
+        public static int PrintHelp()
         {
             Console.WriteLine();
             Console.WriteLine("Usage: fixsubs filename <dictionaryfile>");
@@ -108,10 +111,12 @@ namespace fixsubs
         }
 
         private static System.Text.RegularExpressions.Regex linenumber = new System.Text.RegularExpressions.Regex(@"^\d+$", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Singleline);
+        // Example of an SRT timing line
         // 00:01:22,949 --> 00:01:27,648
         private static System.Text.RegularExpressions.Regex srtTiming = new System.Text.RegularExpressions.Regex(@"^\d+:\d+:\d+,\d+", System.Text.RegularExpressions.RegexOptions.Compiled);
 
 
+        // Returns true if the line should be ignored and not parsed
         public static bool IgnoreLine(string line)
         {
             if (line.Length == 0)
@@ -124,7 +129,7 @@ namespace fixsubs
         }
 
 
-
+        // Reads in a file with newline seperated words and returns the results in a HashSet
         public static HashSet<string> ReadWordFile(string filename)
         {
             HashSet<string> words = new HashSet<string>();
@@ -133,15 +138,12 @@ namespace fixsubs
                 string readword = "";
                 while (!sr.EndOfStream)
                 {
-                    readword = sr.ReadLine();
+                    readword = sr.ReadLine().ToLowerInvariant();
                     if (!String.IsNullOrEmpty(readword) && !words.Contains(readword))
                     {
                         words.Add(readword);
-
                     }
-
                 }
-
             }
             return words;
         }
